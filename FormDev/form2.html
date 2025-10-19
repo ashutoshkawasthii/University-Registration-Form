@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Responsive Modern Auth Form — Demo</title>
+    <style>
+      /* ----------------------------
+       Base / Reset
+       ---------------------------- */
+      :root {
+        --bg: #0f1724;
+        --card: #0b1220;
+        --muted: #94a3b8;
+        --accent: #60a5fa;
+        --success: #34d399;
+        --danger: #fb7185;
+        --glass: rgba(255, 255, 255, 0.06);
+        --glass-strong: rgba(255, 255, 255, 0.08);
+        color-scheme: dark;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      }
+      [data-theme='light'] {
+        --bg: #f6f8fb;
+        --card: #ffffff;
+        --muted: #6b7280;
+        --accent: #2563eb;
+        --success: #10b981;
+        --danger: #ef4444;
+        --glass: rgba(15, 23, 42, 0.04);
+        --glass-strong: rgba(15, 23, 42, 0.06);
+        color-scheme: light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        background: radial-gradient(1200px 500px at 10% 10%, rgba(96, 165, 250, 0.07), transparent),
+          radial-gradient(900px 400px at 90% 90%, rgba(99, 102, 241, 0.04), transparent), var(--bg);
+        font-size: 16px;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        transition: background 0.4s ease, color 0.3s ease;
+      }
+
+      /* blurred backdrop area */
+      .backdrop {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.04));
+        backdrop-filter: blur(6px) saturate(120%);
+        opacity: 0.6;
+      }
+
+      /* main card */
+      .card {
+        width: 100%;
+        max-width: 920px;
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        gap: 2rem;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
+        border: 1px solid var(--glass-strong);
+        overflow: hidden;
+        backdrop-filter: blur(8px);
+        transition: transform 0.35s ease, box-shadow 0.35s ease;
+      }
+      .card:hover {
+        transform: translateY(-6px);
+      }
+
+      /* left illustration panel */
+      .panel {
+        padding: 1.25rem;
+        border-radius: 12px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), transparent);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+        justify-content: center;
+      }
+      .brand {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+      .logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--accent), #7c3aed);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+      }
+      h1 {
+        margin: 0;
+        font-size: 1.375rem;
+      }
+      p.lead {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      /* form area */
+      .form-wrap {
+        padding: 1rem;
+        border-radius: 12px;
+        background: var(--card);
+        min-height: 380px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      form {
+        width: 100%;
+        max-width: 380px;
+      }
+      .field {
+        margin-bottom: 1rem;
+        position: relative;
+      }
+      label {
+        display: block;
+        font-size: 0.875rem;
+        margin-bottom: 0.35rem;
+        color: var(--muted);
+      }
+      input {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        background: transparent;
+        color: inherit;
+        outline: none;
+        transition: box-shadow 0.18s ease, border-color 0.18s ease;
+      }
+      input:focus {
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        border-color: var(--accent);
+      }
+
+      .hint {
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin-top: 0.35rem;
+      }
+      .error {
+        color: var(--danger);
+        font-size: 0.82rem;
+        margin-top: 0.35rem;
+      }
+
+      .row {
+        display: flex;
+        gap: 0.75rem;
+      }
+      .half {
+        flex: 1;
+      }
+
+      .actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1rem;
+      }
+      .btn {
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 0;
+        background: var(--accent);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.12);
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+      }
+      .btn:active {
+        transform: translateY(1px);
+      }
+      .btn.ghost {
+        background: transparent;
+        border: 1px solid var(--glass);
+        color: var(--muted);
+        box-shadow: none;
+      }
+
+      /* password strength */
+      .meter {
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+        margin-top: 0.5rem;
+      }
+      .meter > span {
+        display: block;
+        height: 100%;
+        width: 0;
+        transition: width 0.35s ease;
+      }
+
+      /* theme toggle */
+      .theme-toggle {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .toggle {
+        width: 44px;
+        height: 26px;
+        background: var(--glass);
+        border-radius: 999px;
+        padding: 3px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+      }
+      .toggle .knob {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: white;
+        transform: translateX(0);
+        transition: transform 0.18s ease;
+      }
+      [data-theme='light'] .toggle .knob {
+        transform: translateX(18px);
+      }
+
+      /* confirmation modal */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 6, 23, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+      .modal {
+        width: min(520px, 94%);
+        background: var(--card);
+        padding: 1.5rem;
+        border-radius: 14px;
+        border: 1px solid var(--glass-strong);
+        transform: translateY(20px) scale(0.98);
+        opacity: 0;
+        transition: all 0.28s cubic-bezier(0.2, 0.9, 0.3, 1);
+      }
+      .modal.show {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+      .modal-backdrop.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* success animation */
+      .check {
+        width: 84px;
+        height: 84px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--success), #34d399);
+        display: grid;
+        place-items: center;
+        color: white;
+        font-weight: 700;
+        margin: 0 auto;
+      }
+
+      /* responsive */
+      @media (max-width: 880px) {
+        .card {
+          grid-template-columns: 1fr;
+          max-width: 560px;
+        }
+        .panel {
+          order: 2;
+        }
+        .form-wrap {
+          order: 1;
+        }
+      }
+      @media (max-width: 420px) {
+        body {
+          padding: 1rem;
+        }
+        .card {
+          padding: 1rem;
+        }
+        input {
+          padding: 10px;
+        }
+        .brand h1 {
+          font-size: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="backdrop" aria-hidden="true"></div>
+
+
+    <div class="card" id="card">
+      <div class="panel" aria-hidden="true">
+        <div class="brand">
+          <div class="logo">A</div>
+          <div>
+            <h1>Auth Demo</h1>
+            <p class="lead">Modern responsive auth form · Light / Dark · Vanilla JS</p>
+          </div>
+        </div>
+
+        <div style="margin-top: 1rem">
+          <p style="margin: 0 0 0.5rem; color: var(--muted)">Quick features</p>
+          <ul style="margin: 0; padding-left: 1rem; color: var(--muted)">
+            <li>Dummy authentication logic</li>
+            <li>Client-side validation & password strength</li>
+            <li>Theme persisted in localStorage</li>
+            <li>Animated confirmation modal</li>
+          </ul>
+        </div>
+
+        <div style="margin-top: auto; width: 100%; display: flex; justify-content: space-between; align-items: center">
+          <small style="color: var(--muted)">Built with ❤️ — Vanilla HTML/CSS/JS</small>
+          <div class="theme-toggle" title="Toggle theme" id="themeToggle">
+            <small style="color: var(--muted); font-size: 0.82rem">Theme</small>
+            <div class="toggle" role="button" aria-pressed="false">
+              <div class="knob"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-wrap">
+        <form id="authForm" novalidate>
+          <!-- Username -->
+          <div class="field">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" autocomplete="username" placeholder="e.g. demo" />
+            <div class="hint" data-hint-for="username">Choose a short username (3-20 chars).</div>
+            <div class="error" data-error-for="username" hidden></div>
+          </div>
+
+          <!-- Email -->
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" />
+            <div class="hint" data-hint-for="email">We'll use this for confirmation (dummy).</div>
+            <div class="error" data-error-for="email" hidden></div>
+          </div>
+
+          <div class="row">
+            <div class="field half">
+              <label for="password">Password</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                placeholder="strong password"
+              />
+              <div class="meter" aria-hidden="true"><span id="pwdMeter"></span></div>
+              <div class="hint" data-hint-for="password">At least 6 characters. Avoid common words.</div>
+              <div class="error" data-error-for="password" hidden></div>
+            </div>
+
+            <div class="field half">
+              <label for="confirm">Confirm Password</label>
+              <input
+                id="confirm"
+                name="confirm"
+                type="password"
+                autocomplete="new-password"
+                placeholder="repeat password"
+              />
+              <div class="hint" data-hint-for="confirm">Must match the password above.</div>
+              <div class="error" data-error-for="confirm" hidden></div>
+            </div>
+          </div>
+
+          <div
+            style="display: flex; align-items: center; gap: 0.5rem; justify-content: space-between; margin-top: 0.25rem"
+          >
+            <div style="display: flex; gap: 0.5rem; align-items: center">
+              <input id="showPwd" type="checkbox" />
+              <label for="showPwd" style="font-size: 0.9rem; color: var(--muted)">Show passwords</label>
+            </div>
+
+            <button type="button" class="btn ghost" id="fillDemo">Fill demo</button>
+          </div>
+
+          <div class="actions">
+            <div style="display: flex; gap: 0.5rem; align-items: center">
+              <input id="remember" type="checkbox" />
+              <label for="remember" style="font-size: 0.9rem; color: var(--muted)">Remember me</label>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem">
+              <button type="button" class="btn ghost" id="resetBtn">Reset</button>
+              <button type="submit" class="btn" id="submitBtn">Submit</button>
+            </div>
+          </div>
+
+          <div style="margin-top: 1rem; color: var(--muted); font-size: 0.85rem">
+            Tip: try <strong>demo</strong> / <strong>1234</strong> for quick success.
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Confirmation modal -->
+    <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="modal" role="document" aria-labelledby="modalTitle">
+        <div class="check" aria-hidden="true">✓</div>
+        <h2 id="modalTitle" style="text-align: center; margin-top: 1rem">Success!</h2>
+        <p id="modalMsg" style="text-align: center; color: var(--muted)">
+          You've been authenticated (dummy logic) — welcome aboard.
+        </p>
+        <div style="display: flex; justify-content: center; margin-top: 1rem; gap: 0.75rem">
+          <button class="btn" id="modalClose">Continue</button>
+          <button class="btn ghost" id="modalLogout">Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* ----------------------------
+       Helper / DOM selection
+       ---------------------------- */
+      const root = document.documentElement;
+      const themeToggle = document.getElementById('themeToggle');
+      const toggleBtn = themeToggle.querySelector('.toggle');
+      const authForm = document.getElementById('authForm');
+      const username = document.getElementById('username');
+      const email = document.getElementById('email');
+      const password = document.getElementById('password');
+      const confirm = document.getElementById('confirm');
+      const pwdMeter = document.getElementById('pwdMeter');
+      const showPwd = document.getElementById('showPwd');
+      const fillDemo = document.getElementById('fillDemo');
+      const resetBtn = document.getElementById('resetBtn');
+      const modal = document.getElementById('modalBackdrop');
+      const modalClose = document.getElementById('modalClose');
+      const modalLogout = document.getElementById('modalLogout');
+
+      /* ----------------------------
+       Theme: load / persist
+       - store as "theme" = 'dark'|'light'
+       ---------------------------- */
+      function applyTheme(theme) {
+        if (theme === 'light') {
+          document.documentElement.setAttribute('data-theme', 'light');
+          toggleBtn.setAttribute('aria-pressed', 'true');
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          toggleBtn.setAttribute('aria-pressed', 'false');
+        }
+      }
+
+      // init theme from localStorage or prefers-color-scheme
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        applyTheme(savedTheme);
+      } else {
+        const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        applyTheme(prefersLight ? 'light' : 'dark');
+      }
+
+      themeToggle.addEventListener('click', () => {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        const newTheme = isLight ? 'dark' : 'light';
+        applyTheme(newTheme);
+        localStorage.setItem('theme', newTheme);
+        // small accessible cue
+        toggleBtn.setAttribute('aria-pressed', String(newTheme === 'light'));
+      });
+
+      /* ----------------------------
+       Utility: show/hide error messages
+       ---------------------------- */
+      function showError(name, msg) {
+        const el = document.querySelector(`[data-error-for="${name}"]`);
+        if (!el) return;
+        el.textContent = msg;
+        el.hidden = false;
+      }
+      function clearError(name) {
+        const el = document.querySelector(`[data-error-for="${name}"]`);
+        if (!el) return;
+        el.textContent = '';
+        el.hidden = true;
+      }
+
+      /* ----------------------------
+       Password strength meter
+       - simple scoring: length + variety
+       - demonstrates deep DOM updates
+       ---------------------------- */
+      function calcStrength(pwd) {
+        let score = 0;
+        if (!pwd) return 0;
+        if (pwd.length >= 6) score += 1;
+        if (pwd.length >= 10) score += 1;
+        if (/[0-9]/.test(pwd)) score += 1;
+        if (/[A-Z]/.test(pwd)) score += 1;
+        if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
+        return score; // 0-5
+      }
+      function updateMeter() {
+        const s = calcStrength(password.value);
+        const pct = (s / 5) * 100;
+        pwdMeter.style.width = pct + '%';
+        // color using inline background so we can animate easily
+        let col = 'transparent';
+        if (s <= 1) col = 'linear-gradient(90deg,var(--danger),#fb7185)';
+        else if (s <= 3) col = 'linear-gradient(90deg,#f59e0b,var(--accent))';
+        else col = 'linear-gradient(90deg,var(--success),#34d399)';
+        pwdMeter.style.background = col;
+      }
+      password.addEventListener('input', updateMeter);
+
+      /* ----------------------------
+       Live validation & deep DOM manipulation
+       - shows hints/errors dynamically
+       ---------------------------- */
+      function validateField(name) {
+        if (name === 'username') {
+          const v = username.value.trim();
+          if (!v) return showError('username', 'Username required');
+          if (v.length < 3) return showError('username', 'Username too short');
+          clearError('username');
+          return true;
+        }
+        if (name === 'email') {
+          const v = email.value.trim();
+          if (!v) return showError('email', 'Email required');
+          // basic regex — fine for demo
+          const ok = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
+          if (!ok) return showError('email', 'Invalid email format');
+          clearError('email');
+          return true;
+        }
+        if (name === 'password') {
+          const v = password.value;
+          if (!v) return showError('password', 'Password required');
+          if (v.length < 6) return showError('password', 'Password must be >= 6 chars');
+          clearError('password');
+          return true;
+        }
+        if (name === 'confirm') {
+          const v = confirm.value;
+          if (!v) return showError('confirm', 'Confirmation required');
+          if (v !== password.value) return showError('confirm', 'Passwords do not match');
+          clearError('confirm');
+          return true;
+        }
+      }
+
+      // live events
+      [username, email, password, confirm].forEach((el) => {
+        el.addEventListener('input', (e) => {
+          validateField(e.target.id);
+        });
+      });
+
+      // show/hide passwords
+      showPwd.addEventListener('change', () => {
+        const t = showPwd.checked ? 'text' : 'password';
+        password.type = t;
+        confirm.type = t;
+      });
+
+      // Fill demo data
+      fillDemo.addEventListener('click', () => {
+        username.value = 'demo';
+        email.value = 'demo@example.com';
+        password.value = '1234';
+        confirm.value = '1234';
+        updateMeter();
+        // deep DOM: trigger validation flows programmatically
+        ['username', 'email', 'password', 'confirm'].forEach(validateField);
+      });
+
+      // Reset
+      resetBtn.addEventListener('click', () => {
+        authForm.reset();
+        updateMeter();
+        ['username', 'email', 'password', 'confirm'].forEach(clearError);
+      });
+
+      /* ----------------------------
+       Submit handler — dummy auth logic
+       - prevents real network calls
+       - demonstrates DOM updates & modal flow
+       ---------------------------- */
+      authForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        // run validation
+        const okUsername = validateField('username');
+        const okEmail = validateField('email');
+        const okPassword = validateField('password');
+        const okConfirm = validateField('confirm');
+        if (!(okUsername && okEmail && okPassword && okConfirm)) return;
+
+        // dummy auth: accept username === 'demo' and password === '1234'
+        const isDemo =
+          (username.value.trim().toLowerCase() === 'demo' && password.value === '1234') ||
+          (email.value.trim().toLowerCase() === 'demo@example.com' && password.value === '1234');
+
+        // show nice animated modal with message
+        const title = modal.querySelector('#modalTitle');
+        const msg = modal.querySelector('#modalMsg');
+        if (isDemo) {
+          title.textContent = 'Welcome, ' + username.value.trim() + '!';
+          msg.textContent = 'Authentication success (dummy). You can continue to the demo area.';
+        } else {
+          title.textContent = 'Almost there...';
+          msg.textContent = 'Credentials not recognized by the demo. Try "demo / 1234" or continue anyway.';
+        }
+
+        // animate modal in
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        modal.querySelector('.modal').classList.add('show');
+
+        // subtle confetti-like pseudo effect (small decorative JS animation)
+        if (isDemo) playTinyBurst();
+      });
+
+      // Modal controls
+      function closeModal() {
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+        modal.querySelector('.modal').classList.remove('show');
+      }
+      modalClose.addEventListener('click', () => {
+        closeModal();
+      });
+      modalLogout.addEventListener('click', () => {
+        // dummy logout -> reset form and close
+        authForm.reset();
+        updateMeter();
+        ['username', 'email', 'password', 'confirm'].forEach(clearError);
+        closeModal();
+      });
+
+      // close on backdrop click
+      modal.addEventListener('click', (ev) => {
+        if (ev.target === modal) closeModal();
+      });
+
+      // keyboard accessible: Esc to close
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+      });
+
+      /* ----------------------------
+       Decorative tiny burst (not heavy)
+       - creates a few ephemeral DOM nodes for animation
+       ---------------------------- */
+      function playTinyBurst() {
+        const container = document.createElement('div');
+        container.style.position = 'fixed';
+        container.style.left = '50%';
+        container.style.top = '40%';
+        container.style.pointerEvents = 'none';
+        container.style.transform = 'translate(-50%,-50%)';
+        document.body.appendChild(container);
+        for (let i = 0; i < 12; i++) {
+          const dot = document.createElement('div');
+          dot.style.width = '6px';
+          dot.style.height = '6px';
+          dot.style.borderRadius = '50%';
+          dot.style.position = 'absolute';
+          dot.style.background = 'white';
+          dot.style.opacity = '0.9';
+          const ang = ((Math.PI * 2) / 12) * i;
+          const dist = 60 + Math.random() * 20;
+          dot.animate(
+            [
+              { transform: 'translate(0,0) scale(1)', opacity: 1 },
+              { transform: `translate(${Math.cos(ang) * dist}px,${Math.sin(ang) * dist}px) scale(0.6)`, opacity: 0 },
+            ],
+            { duration: 600 + Math.random() * 300, easing: 'cubic-bezier(.2,.9,.3,1)' }
+          );
+          container.appendChild(dot);
+        }
+        setTimeout(() => container.remove(), 1200);
+      }
+
+      // accessibility: focus first input on load
+      window.addEventListener('load', () => {
+        username.focus();
+      });
+
+      /* ----------------------------
+       End of script — well-commented
+       ---------------------------- */
+    </script>
+  </body>
+</html>
